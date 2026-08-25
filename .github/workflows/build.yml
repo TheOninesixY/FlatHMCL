@@ -1,0 +1,59 @@
+name: Auto Build HMCL Flatpak
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Latest HMCL Release Info
+        id: get_release
+        run: |
+          RELEASE_JSON=$(curl -sL https://api.github.com/repos/HMCL-dev/HMCL/releases/latest)
+          
+          DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".sh")) | .browser_download_url')
+          TAG_NAME=$(echo "$RELEASE_JSON" | jq -r '.tag_name')
+          
+          echo "Latest Tag: $TAG_NAME"
+          echo "Download URL: $DOWNLOAD_URL"
+          
+          curl -sL "$DOWNLOAD_URL" -o hmcl_latest.sh
+          SHA256_HASH=$(sha256sum hmcl_latest.sh | awk '{print $1}')
+          rm hmcl_latest.sh
+          
+          echo "Calculated SHA256: $SHA256_HASH"
+          
+          sed -i "s|url: https://github.com/HMCL-dev/HMCL/releases/download/.*|url: $DOWNLOAD_URL|g" net.huangyuhui.HMCL.yml
+          sed -i "s|sha256: .*|sha256: $SHA256_HASH|g" net.huangyuhui.HMCL.yml
+          
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Install Flatpak & flatpak-builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install Runtime and SDK
+        run: |
+          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+      - name: Build Flatpak Application
+        run: |
+          flatpak-builder --user --force-clean --repo=repo build-dir net.huangyuhui.HMCL.yml
+          flatpak build-bundle repo net.huangyuhui.HMCL.flatpak net.huangyuhui.HMCL
+
+      - name: Upload Flatpak Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HMCL-${{ steps.get_release.outputs.tag_name }}.flatpak
+          path: net.huangyuhui.HMCL.flatpak
