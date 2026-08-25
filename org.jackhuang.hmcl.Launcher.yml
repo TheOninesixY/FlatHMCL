@@ -1,0 +1,44 @@
+app-id: org.jackhuang.hmcl.Launcher
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: hmcl
+
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+
+finish-args:
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+  - --socket=x11
+  - --socket=wayland
+  - --share=ipc
+  - --device=dri
+  - --share=network
+  - --socket=pulseaudio
+  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=xdg-data/minecraft:create
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-download
+  - --filesystem=~/.minecraft:create
+  - --allow=devel
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+
+  - name: hmcl-build
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 build.sh /app/bin/hmcl
+      - install -Dm644 org.jackhuang.hmcl.Launcher.desktop /app/share/applications/org.jackhuang.hmcl.Launcher.desktop
+      - install -Dm644 org.jackhuang.hmcl.Launcher.png /app/share/icons/hicolor/256x256/apps/org.jackhuang.hmcl.Launcher.png
+    sources:
+      - type: file
+        path: build.sh
+      - type: file
+        path: org.jackhuang.hmcl.Launcher.desktop
+      - type: file
+        path: org.jackhuang.hmcl.Launcher.png
