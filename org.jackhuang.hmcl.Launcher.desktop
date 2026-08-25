@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=HMCL
-GenericName=Minecraft Launcher
-Comment=A multi-functional, cross-platform Minecraft launcher.
+GenericName=Hello Minecraft! Launcher
+Comment=Hello Minecraft! Launcher
 Exec=hmcl
 Icon=org.jackhuang.hmcl.Launcher
 Terminal=false
