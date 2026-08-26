@@ -1,10 +1,11 @@
 [Desktop Entry]
 Name=HMCL
 GenericName=Hello Minecraft! Launcher
-Comment=Hello Minecraft! Launcher
+Comment=HMCL Minecraft Launcher
 Exec=hmcl
-Icon=org.jackhuang.hmcl.Launcher
+Icon=io.qzz.OninesixY.HMCL
 Terminal=false
 Type=Application
-Categories=Game;Java;
+Categories=Game;
+Keywords=minecraft;mc;
 StartupWMClass=org.jackhuang.hmcl.Launcher

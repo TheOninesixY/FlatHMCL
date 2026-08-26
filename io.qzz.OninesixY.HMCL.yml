@@ -1,6 +1,6 @@
-app-id: org.jackhuang.hmcl.Launcher
+app-id: io.qzz.OninesixY.HMCL
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: hmcl
 
@@ -10,14 +10,14 @@ sdk-extensions:
 finish-args:
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --env=JAVA_HOME=/app/jre
-  - --socket=x11
+  - --socket=fallback-x11
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  - --device=all
   - --share=network
   - --socket=pulseaudio
   - --talk-name=org.freedesktop.Notifications
-  - --filesystem=xdg-data/minecraft:create
   - --filesystem=xdg-documents
   - --filesystem=xdg-download
   - --filesystem=~/.minecraft:create
@@ -32,13 +32,16 @@ modules:
   - name: hmcl-build
     buildsystem: simple
     build-commands:
-      - install -Dm755 build.sh /app/bin/hmcl
-      - install -Dm644 org.jackhuang.hmcl.Launcher.desktop /app/share/applications/org.jackhuang.hmcl.Launcher.desktop
-      - install -Dm644 org.jackhuang.hmcl.Launcher.png /app/share/icons/hicolor/256x256/apps/org.jackhuang.hmcl.Launcher.png
+      - install -Dm755 run.sh /app/bin/hmcl
+      - install -Dm644 io.qzz.OninesixY.HMCL.desktop /app/share/applications/io.qzz.OninesixY.HMCL.desktop
+      - install -Dm644 io.qzz.OninesixY.HMCL.metainfo.xml /app/share/metainfo/io.qzz.OninesixY.HMCL.metainfo.xml
+      - install -Dm644 io.qzz.OninesixY.HMCL.png /app/share/icons/hicolor/256x256/apps/io.qzz.OninesixY.HMCL.png
     sources:
       - type: file
-        path: build.sh
+        path: run.sh
       - type: file
-        path: org.jackhuang.hmcl.Launcher.desktop
+        path: io.qzz.OninesixY.HMCL.desktop
       - type: file
-        path: org.jackhuang.hmcl.Launcher.png
+        path: io.qzz.OninesixY.HMCL.metainfo.xml
+      - type: file
+        path: io.qzz.OninesixY.HMCL.png
