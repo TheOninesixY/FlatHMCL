@@ -8,10 +8,11 @@
   <screenshots>
     <screenshot type="default">
       <caption>主界面概览</caption>
-      <caption xml:lang="zh_CN">主界面概览</caption>
+      <caption xml:lang="zh-CN">主界面概览</caption>
       <caption xml:lang="en">Main Window Overview</caption>
-      <image type="source">https://raw.githubusercontent.com/username/project/v1.0.0/data/screenshots/main.png</image>
+      <image type="source">https://theoninesixy.github.io/HMCL/screenshot.png</image>
     </screenshot>
+  </screenshots>
   <description>
     <p>
       HMCL 是一款开源、跨平台的 Minecraft 启动器，支持模组管理、游戏自定义、自动安装组件（Forge、NeoForge、Fabric、OptiFine 等）、整合包创建与界面自定义等功能。

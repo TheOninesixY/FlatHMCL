@@ -8,19 +8,26 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
+  # 环境变量
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --env=JAVA_HOME=/app/jre
-  - --socket=x11
+  # 显示与图形
+  - --socket=fallback-x11
+  - --socket=wayland
   - --share=ipc
   - --device=dri
-  - --socket=wayland
+  # 音频与网络
   - --share=network
   - --socket=pulseaudio
+  # 系统服务与通知
   - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.secrets
+  # 目录与存储
   - --filesystem=xdg-documents
   - --filesystem=xdg-download
   - --filesystem=~/.minecraft:create
   - --filesystem=~/.hmcl:create
+  # 权限与调试支持
   - --allow=devel
 
 modules:
@@ -35,6 +42,13 @@ modules:
         dest-filename: jq
         only-arches:
           - x86_64
+      - type: file
+        url: https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64
+        sha256: 39a486333932766dc822d56a31c039ab610a7114d69bcba23a3d5e2a233b8253
+        dest-filename: jq
+        only-arches:
+          - aarch64
+
   - name: openjdk
     buildsystem: simple
     build-commands:
