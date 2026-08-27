@@ -52,8 +52,8 @@ jobs:
       - name: Update manifest and metainfo
         id: update_files
         run: |
-          MANIFEST="io.qzz.OninesixY.HMCL.yml"
-          METAINFO="io.qzz.OninesixY.HMCL.metainfo.xml"
+          MANIFEST="io.github.theoninesixy.FlatHMCL.yml"
+          METAINFO="io.github.theoninesixy.FlatHMCL.metainfo.xml"
           
           NEW_URL="${{ steps.get_release.outputs.download_url }}"
           NEW_SHA="${{ steps.calc_sha.outputs.sha256 }}"

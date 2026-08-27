@@ -1,4 +1,4 @@
-app-id: io.qzz.OninesixY.HMCL
+app-id: io.github.theoninesixy.FlatHMCL
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
@@ -33,15 +33,15 @@ modules:
     buildsystem: simple
     build-commands:
       - install -Dm755 run.sh /app/bin/hmcl
-      - install -Dm644 io.qzz.OninesixY.HMCL.desktop /app/share/applications/io.qzz.OninesixY.HMCL.desktop
-      - install -Dm644 io.qzz.OninesixY.HMCL.metainfo.xml /app/share/metainfo/io.qzz.OninesixY.HMCL.metainfo.xml
-      - install -Dm644 io.qzz.OninesixY.HMCL.png /app/share/icons/hicolor/256x256/apps/io.qzz.OninesixY.HMCL.png
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.desktop /app/share/applications/io.github.theoninesixy.FlatHMCL.desktop
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.metainfo.xml /app/share/metainfo/io.github.theoninesixy.FlatHMCL.metainfo.xml
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
     sources:
       - type: file
         path: run.sh
       - type: file
-        path: io.qzz.OninesixY.HMCL.desktop
+        path: io.github.theoninesixy.FlatHMCL.desktop
       - type: file
-        path: io.qzz.OninesixY.HMCL.metainfo.xml
+        path: io.github.theoninesixy.FlatHMCL.metainfo.xml
       - type: file
-        path: io.qzz.OninesixY.HMCL.png
+        path: io.github.theoninesixy.FlatHMCL.png

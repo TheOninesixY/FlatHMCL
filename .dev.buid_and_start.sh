@@ -1,2 +1,2 @@
-flatpak-builder --user --install --force-clean build-dir io.qzz.OninesixY.HMCL.yml
-flatpak run io.qzz.OninesixY.HMCL
+flatpak-builder --user --install --force-clean build-dir io.github.theoninesixy.FlatHMCL.yml
+flatpak run io.github.theoninesixy.FlatHMCL

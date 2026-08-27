@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATA_DIR="${XDG_DATA_HOME:-$HOME/.var/app/io.qzz.OninesixY.HMCL/data}/hmcl-bin"
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.var/app/io.github.theoninesixy.FlatHMCL/data}/hmcl-bin"
 mkdir -p "$DATA_DIR"
 
 VERSION_FILE="$DATA_DIR/version.txt"
