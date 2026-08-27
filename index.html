@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlatHMCL - 独立 Flatpak 版 Hello Minecraft! Launcher</title>
+
+  <!-- Favicon: 当前目录下的 icon.png -->
+  <link rel="icon" href="icon.png" type="image/png">
+
+  <!-- Google Fonts: Roboto, Outfit & Material Symbols Rounded -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+  <style>
+    /* ==========================================================================
+       1. MD3 Design Tokens (朴素无渐变色板)
+       ========================================================================== */
+    :root {
+      /* 浅色模式默认值 */
+      --md-sys-color-primary: #006876;
+      --md-sys-color-on-primary: #ffffff;
+      --md-sys-color-primary-container: #d3f3f9;
+      --md-sys-color-on-primary-container: #001f25;
+
+      --md-sys-color-secondary: #4a6268;
+      --md-sys-color-on-secondary: #ffffff;
+      --md-sys-color-secondary-container: #d9e6e9;
+      --md-sys-color-on-secondary-container: #051f24;
+
+      --md-sys-color-surface: #fafdfd;
+      --md-sys-color-on-surface: #191c1d;
+      --md-sys-color-surface-variant: #e0e9eb;
+      --md-sys-color-on-surface-variant: #3f484a;
+      --md-sys-color-surface-container: #f0f4f5;
+      --md-sys-color-surface-container-high: #e7ecee;
+
+      --md-sys-color-outline: #70797b;
+      --md-sys-color-outline-variant: #c4cecf;
+      --md-sys-color-inverse-surface: #2d3132;
+      --md-sys-color-inverse-on-surface: #eff1f2;
+
+      /* MD3 基础圆角 */
+      --md-shape-corner-small: 8px;
+      --md-shape-corner-medium: 12px;
+      --md-shape-corner-large: 16px;
+      --md-shape-corner-extra-large: 24px;
+      --md-shape-corner-full: 9999px;
+    }
+
+    /* 跟随系统/浏览器深色偏好 */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --md-sys-color-primary: #4ed8ed;
+        --md-sys-color-on-primary: #00363e;
+        --md-sys-color-primary-container: #004e59;
+        --md-sys-color-on-primary-container: #a2efff;
+
+        --md-sys-color-secondary: #b1cbd1;
+        --md-sys-color-on-secondary: #1c3439;
+        --md-sys-color-secondary-container: #334b50;
+        --md-sys-color-on-secondary-container: #cde7ee;
+
+        --md-sys-color-surface: #111415;
+        --md-sys-color-on-surface: #e1e3e3;
+        --md-sys-color-surface-variant: #3f484a;
+        --md-sys-color-on-surface-variant: #bfc8ca;
+        --md-sys-color-surface-container: #1d2021;
+        --md-sys-color-surface-container-high: #282b2c;
+
+        --md-sys-color-outline: #899294;
+        --md-sys-color-outline-variant: #3f484a;
+        --md-sys-color-inverse-surface: #e1e3e3;
+        --md-sys-color-inverse-on-surface: #2e3132;
+      }
+    }
+
+    /* 手动强制暗色 */
+    [data-theme="dark"] {
+      --md-sys-color-primary: #4ed8ed;
+      --md-sys-color-on-primary: #00363e;
+      --md-sys-color-primary-container: #004e59;
+      --md-sys-color-on-primary-container: #a2efff;
+
+      --md-sys-color-secondary: #b1cbd1;
+      --md-sys-color-on-secondary: #1c3439;
+      --md-sys-color-secondary-container: #334b50;
+      --md-sys-color-on-secondary-container: #cde7ee;
+
+      --md-sys-color-surface: #111415;
+      --md-sys-color-on-surface: #e1e3e3;
+      --md-sys-color-surface-variant: #3f484a;
+      --md-sys-color-on-surface-variant: #bfc8ca;
+      --md-sys-color-surface-container: #1d2021;
+      --md-sys-color-surface-container-high: #282b2c;
+
+      --md-sys-color-outline: #899294;
+      --md-sys-color-outline-variant: #3f484a;
+      --md-sys-color-inverse-surface: #e1e3e3;
+      --md-sys-color-inverse-on-surface: #2e3132;
+    }
+
+    /* 手动强制浅色 */
+    [data-theme="light"] {
+      --md-sys-color-primary: #006876;
+      --md-sys-color-on-primary: #ffffff;
+      --md-sys-color-primary-container: #d3f3f9;
+      --md-sys-color-on-primary-container: #001f25;
+
+      --md-sys-color-secondary: #4a6268;
+      --md-sys-color-on-secondary: #ffffff;
+      --md-sys-color-secondary-container: #d9e6e9;
+      --md-sys-color-on-secondary-container: #051f24;
+
+      --md-sys-color-surface: #fafdfd;
+      --md-sys-color-on-surface: #191c1d;
+      --md-sys-color-surface-variant: #e0e9eb;
+      --md-sys-color-on-surface-variant: #3f484a;
+      --md-sys-color-surface-container: #f0f4f5;
+      --md-sys-color-surface-container-high: #e7ecee;
+
+      --md-sys-color-outline: #70797b;
+      --md-sys-color-outline-variant: #c4cecf;
+      --md-sys-color-inverse-surface: #2d3132;
+      --md-sys-color-inverse-on-surface: #eff1f2;
+    }
+
+    /* ==========================================================================
+       2. 基础布局与排版
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      line-height: 1.6;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    h1, h2, h3, h4, .brand-title {
+      font-family: 'Outfit', sans-serif;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ==========================================================================
+       3. 顶栏与 MD3 按钮规范
+       ========================================================================== */
+    .top-app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--md-sys-color-surface);
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .nav-content {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: var(--md-shape-corner-small);
+      display: block;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+      height: 40px;
+      border-radius: var(--md-shape-corner-full);
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn-filled {
+      background-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+    .btn-filled:hover {
+      opacity: 0.92;
+    }
+
+    .btn-tonal {
+      background-color: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+    .btn-tonal:hover {
+      opacity: 0.9;
+    }
+
+    .btn-outlined {
+      background-color: transparent;
+      color: var(--md-sys-color-primary);
+      border: 1px solid var(--md-sys-color-outline);
+    }
+    .btn-outlined:hover {
+      background-color: var(--md-sys-color-surface-container);
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--md-shape-corner-full);
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn:hover {
+      background-color: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    /* ==========================================================================
+       4. Hero、提示与截图
+       ========================================================================== */
+    .hero {
+      padding: 48px 0 32px;
+      text-align: left;
+    }
+
+    .app-id-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--md-sys-color-on-surface-variant);
+      background-color: var(--md-sys-color-surface-container-high);
+      padding: 4px 12px;
+      border-radius: var(--md-shape-corner-small);
+      margin-bottom: 16px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--md-sys-color-on-surface-variant);
+      max-width: 760px;
+      margin-bottom: 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    /* 不上架 Flathub 说明卡 */
+    .info-callout {
+      background-color: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-left: 4px solid var(--md-sys-color-primary);
+      border-radius: var(--md-shape-corner-small);
+      padding: 16px 20px;
+      margin-bottom: 36px;
+    }
+
+    .info-callout h4 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-callout p {
+      font-size: 0.9rem;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* 终端安装命令条 */
+    .terminal-box {
+      background-color: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-shape-corner-medium);
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+
+    .terminal-header {
+      background-color: var(--md-sys-color-surface-container-high);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+      font-size: 0.8rem;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .terminal-content {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .terminal-content code {
+      font-size: 0.9rem;
+      color: var(--md-sys-color-on-surface);
+      word-break: break-all;
+    }
+
+    /* 截图预览 */
+    .preview-section {
+      margin-bottom: 48px;
+    }
+
+    .preview-card {
+      background-color: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-shape-corner-large);
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .preview-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--md-shape-corner-medium);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background-color: var(--md-sys-color-surface);
+    }
+
+    .preview-caption {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* ==========================================================================
+       5. 特性与本地编译步骤
+       ========================================================================== */
+    .section-heading {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin: 40px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .feature-card {
+      background-color: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-shape-corner-medium);
+      padding: 24px 20px;
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .feature-icon {
+      color: var(--md-sys-color-primary);
+      font-size: 22px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.5;
+    }
+
+    .guide-box {
+      background-color: var(--md-sys-color-surface-container);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-shape-corner-medium);
+      padding: 24px;
+      margin-bottom: 48px;
+    }
+
+    .guide-step {
+      margin-bottom: 20px;
+    }
+    .guide-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .guide-step h4 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .code-block {
+      background-color: var(--md-sys-color-surface);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-shape-corner-small);
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: var(--md-sys-color-on-surface);
+      margin-top: 6px;
+      overflow-x: auto;
+    }
+
+    /* ==========================================================================
+       6. 页脚与通知
+       ========================================================================== */
+    footer {
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      padding: 32px 0;
+      margin-top: 40px;
+      font-size: 0.85rem;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .footer-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-link {
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background-color: var(--md-sys-color-inverse-surface);
+      color: var(--md-sys-color-inverse-on-surface);
+      padding: 10px 20px;
+      border-radius: var(--md-shape-corner-small);
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Top App Bar -->
+  <header class="top-app-bar">
+    <div class="container nav-content">
+      <a href="#" class="brand">
+        <!-- 当前目录下的 icon.png -->
+        <img src="icon.png" alt="FlatHMCL Icon" class="brand-icon">
+        <span class="brand-title">FlatHMCL</span>
+      </a>
+
+      <div class="nav-actions">
+        <button id="themeToggle" class="icon-btn" title="切换模式（自动/手动）">
+          <span class="material-symbols-rounded" id="themeIcon">brightness_auto</span>
+        </button>
+        <button class="btn btn-filled" id="navInstallBtn">
+          <span class="material-symbols-rounded" style="font-size: 18px;">terminal</span>
+          <span>复制安装命令</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Hero & 安装区域 -->
+  <main class="container">
+    <section class="hero">
+      <div class="app-id-tag">io.github.theoninesixy.FlatHMCL</div>
+      <h1 class="hero-title">FlatHMCL</h1>
+      <p class="hero-desc">
+        为 Linux 桌面及 SteamOS 打造的独立 Flatpak 打包版本 Hello Minecraft! Launcher。基于 OpenJDK 21 与 Freedesktop 24.08 平台构建，支持沙盒隔离与启动时自动同步上游最新构建。
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn btn-filled" id="heroInstallBtn">
+          <span class="material-symbols-rounded" style="font-size: 18px;">terminal</span>
+          <span>复制安装命令</span>
+        </button>
+        <a href="https://github.com/TheOninesixY/FlatHMCL" target="_blank" class="btn btn-outlined">
+          <span class="material-symbols-rounded" style="font-size: 18px;">code</span>
+          <span>GitHub 仓库</span>
+        </a>
+      </div>
+
+      <!-- 不上架 Flathub 声明 -->
+      <div class="info-callout">
+        <h4>
+          <span class="material-symbols-rounded" style="font-size: 18px; color: var(--md-sys-color-primary);">info</span>
+          分发与安装说明
+        </h4>
+        <p>
+          本项目为独立打包与维护，<strong>不会上架 Flathub</strong>。无需手动下载安装包，直接在终端中运行下方的远程安装命令即可一键完成安装。
+        </p>
+      </div>
+
+      <!-- 远程直接安装终端命令条 -->
+      <div class="terminal-box">
+        <div class="terminal-header">
+          <span>终端直接安装远程文件</span>
+          <span class="material-symbols-rounded" style="font-size: 16px;">terminal</span>
+        </div>
+        <div class="terminal-content">
+          <code id="cmdRemote">flatpak install https://onsy.qzz.io/FlatHMCL/FlatHMCL.flatpak</code>
+          <button class="btn btn-tonal" id="copyBtn" style="height: 32px; padding: 0 12px; font-size: 0.8rem;" title="复制指令">
+            <span class="material-symbols-rounded" style="font-size: 16px;">content_copy</span>
+            <span>复制</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 主界面截图预览 (当前目录下的 screenshot.png) -->
+    <section class="preview-section">
+      <h2 class="section-heading" style="margin-top: 0;">主界面概览</h2>
+      <div class="preview-card">
+        <img src="screenshot.png" alt="FlatHMCL 主界面截图" class="preview-image">
+        <p class="preview-caption">运行于 Flatpak 沙盒环境下的 FlatHMCL 启动器界面</p>
+      </div>
+    </section>
+
+    <!-- 4. 项目特性 -->
+    <section>
+      <h2 class="section-heading">打包特性</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-header">
+            <span class="material-symbols-rounded feature-icon">sync</span>
+            <h3>启动自动同步上游</h3>
+          </div>
+          <p>
+            内置运行机制，启动时自动通过 GitHub API 检测并拉取 HMCL 上游最新稳定 Release JAR 文件；离线或网络故障时自动回退启动本地已有版本。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <span class="material-symbols-rounded feature-icon">terminal</span>
+            <h3>集成 OpenJDK 21</h3>
+          </div>
+          <p>
+            基于 Freedesktop Platform 24.08 并内置 OpenJDK 21 运行环境，适配现代 Minecraft 版本，免去手动配置 Java 环境变量的繁琐流程。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <span class="material-symbols-rounded feature-icon">security</span>
+            <h3>规范权限与持久化</h3>
+          </div>
+          <p>
+            独立沙盒保护，规范映射 <code>~/.minecraft</code> 与 <code>~/.hmcl</code> 目录，既能保护宿主机文件安全，又能与现有游戏配置无缝衔接。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <span class="material-symbols-rounded feature-icon">desktop_windows</span>
+            <h3>Wayland 与图形加速</h3>
+          </div>
+          <p>
+            开放 Wayland、X11、DRI 硬件加速与 Pulseaudio 音频支持，保障在各 Linux 桌面及 SteamOS (Steam Deck) 下的原生流畅度。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 本地构建步骤 -->
+    <section>
+      <h2 class="section-heading">本地编译与构建</h2>
+      <div class="guide-box">
+        <div class="guide-step">
+          <h4>1. 获取仓库代码</h4>
+          <div class="code-block">git clone https://github.com/TheOninesixY/FlatHMCL.git &amp;&amp; cd FlatHMCL</div>
+        </div>
+
+        <div class="guide-step">
+          <h4>2. 编译并直接安装至当前环境</h4>
+          <div class="code-block">flatpak-builder --user --install --install-deps-from=flathub --force-clean build-dir io.github.theoninesixy.FlatHMCL.yml</div>
+        </div>
+
+        <div class="guide-step">
+          <h4>3. 打包生成 FlatHMCL.flatpak</h4>
+          <div class="code-block">flatpak-builder --repo=FlatHMCL --force-clean build-dir io.github.theoninesixy.FlatHMCL.yml<br>flatpak build-bundle FlatHMCL FlatHMCL.flatpak io.github.theoninesixy.FlatHMCL</div>
+        </div>
+
+        <div class="guide-step">
+          <h4>4. 运行应用</h4>
+          <div class="code-block">flatpak run io.github.theoninesixy.FlatHMCL</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. Footer -->
+  <footer>
+    <div class="container footer-content">
+      <div>
+        <p>FlatHMCL 由 <a href="https://github.com/TheOninesixY" target="_blank" class="footer-link">TheOninesixY</a> 维护 · 基于 GPL-3.0-or-later 许可分发</p>
+        <p style="margin-top: 4px; font-size: 0.8rem; opacity: 0.8;">HMCL 原作由 HMCL 团队维护，Minecraft 为 Mojang AB 注册商标。</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://onsy.qzz.io/FlatHMCL/FlatHMCL.flatpak" target="_blank" class="footer-link">远程 Bundle 直链</a>
+        <a href="https://github.com/TheOninesixY/FlatHMCL" target="_blank" class="footer-link">GitHub 仓库</a>
+        <a href="https://hmcl.huangyuhui.net/" target="_blank" class="footer-link">HMCL 官网</a>
+        <a href="https://github.com/HMCL-dev/HMCL/issues" target="_blank" class="footer-link">上游反馈</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast 复制提示 -->
+  <div id="toast" class="toast">命令已复制到剪贴板</div>
+
+  <!-- 脚本逻辑 -->
+  <script>
+    // 1. 深浅色模式管理（默认跟随浏览器/系统，支持三态循环：系统自动 -> 暗色 -> 浅色）
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlEl = document.documentElement;
+
+    const modes = ['auto', 'dark', 'light'];
+    let currentMode = localStorage.getItem('user-theme-mode') || 'auto';
+
+    function applyTheme(mode) {
+      currentMode = mode;
+      localStorage.setItem('user-theme-mode', mode);
+
+      if (mode === 'auto') {
+        htmlEl.removeAttribute('data-theme');
+        themeIcon.textContent = 'brightness_auto';
+      } else if (mode === 'dark') {
+        htmlEl.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = 'dark_mode';
+      } else {
+        htmlEl.setAttribute('data-theme', 'light');
+        themeIcon.textContent = 'light_mode';
+      }
+    }
+
+    applyTheme(currentMode);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const nextIndex = (modes.indexOf(currentMode) + 1) % modes.length;
+      applyTheme(modes[nextIndex]);
+    });
+
+    // 2. 一键复制命令逻辑
+    const cmdText = document.getElementById('cmdRemote').innerText;
+    const toast = document.getElementById('toast');
+    let toastTimer;
+
+    async function copyInstallCommand() {
+      try {
+        await navigator.clipboard.writeText(cmdText);
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2200);
+      } catch (e) {
+        console.error('复制失败:', e);
+      }
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', copyInstallCommand);
+    document.getElementById('heroInstallBtn').addEventListener('click', copyInstallCommand);
+    document.getElementById('navInstallBtn').addEventListener('click', copyInstallCommand);
+  </script>
+</body>
+</html>
