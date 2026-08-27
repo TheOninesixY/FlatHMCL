@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FlatHMCL - 独立 Flatpak 版 Hello Minecraft! Launcher</title>
 
-  <!-- Favicon: 当前目录下的 icon.png -->
   <link rel="icon" href="icon.png" type="image/png">
 
-  <!-- Google Fonts: Roboto, Outfit & Material Symbols Rounded -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,7 +14,6 @@
 
   <style>
     :root {
-      /* 浅色模式默认值 */
       --md-sys-color-primary: #006876;
       --md-sys-color-on-primary: #ffffff;
       --md-sys-color-primary-container: #d3f3f9;
@@ -39,7 +36,6 @@
       --md-sys-color-inverse-surface: #2d3132;
       --md-sys-color-inverse-on-surface: #eff1f2;
 
-      /* MD3 基础圆角 */
       --md-shape-corner-small: 8px;
       --md-shape-corner-medium: 12px;
       --md-shape-corner-large: 16px;
@@ -47,7 +43,6 @@
       --md-shape-corner-full: 9999px;
     }
 
-    /* 跟随系统/浏览器深色偏好 */
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         --md-sys-color-primary: #4ed8ed;
@@ -74,7 +69,6 @@
       }
     }
 
-    /* 手动强制暗色 */
     [data-theme="dark"] {
       --md-sys-color-primary: #4ed8ed;
       --md-sys-color-on-primary: #00363e;
@@ -99,7 +93,6 @@
       --md-sys-color-inverse-on-surface: #2e3132;
     }
 
-    /* 手动强制浅色 */
     [data-theme="light"] {
       --md-sys-color-primary: #006876;
       --md-sys-color-on-primary: #ffffff;
@@ -129,6 +122,27 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    html, body {
+      overflow-x: clip;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
     }
 
     body {
@@ -148,6 +162,10 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
+    .nowrap {
+      white-space: nowrap;
+    }
+
     .container {
       max-width: 1040px;
       margin: 0 auto;
@@ -157,7 +175,7 @@
     .top-app-bar {
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 999;
       background-color: var(--md-sys-color-surface);
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
     }
@@ -167,6 +185,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
     }
 
     .brand {
@@ -174,6 +193,8 @@
       align-items: center;
       gap: 12px;
       text-decoration: none;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     .brand-icon {
@@ -182,18 +203,21 @@
       object-fit: contain;
       border-radius: var(--md-shape-corner-small);
       display: block;
+      flex-shrink: 0;
     }
 
     .brand-title {
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--md-sys-color-on-surface);
+      white-space: nowrap;
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .btn {
@@ -210,6 +234,8 @@
       text-decoration: none;
       cursor: pointer;
       border: none;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: background-color 0.15s ease, opacity 0.15s ease;
     }
 
@@ -249,6 +275,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .icon-btn:hover {
       background-color: var(--md-sys-color-surface-container-high);
@@ -270,6 +297,10 @@
       border-radius: var(--md-shape-corner-small);
       margin-bottom: 16px;
       border: 1px solid var(--md-sys-color-outline-variant);
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .hero-title {
@@ -293,7 +324,6 @@
       margin-bottom: 32px;
     }
 
-    /* 不上架 Flathub 说明卡 */
     .info-callout {
       background-color: var(--md-sys-color-surface-container);
       border: 1px solid var(--md-sys-color-outline-variant);
@@ -316,7 +346,6 @@
       color: var(--md-sys-color-on-surface-variant);
     }
 
-    /* 终端安装命令条 */
     .terminal-box {
       background-color: var(--md-sys-color-surface-container);
       border: 1px solid var(--md-sys-color-outline-variant);
@@ -347,10 +376,13 @@
     .terminal-content code {
       font-size: 0.9rem;
       color: var(--md-sys-color-on-surface);
-      word-break: break-all;
+      white-space: nowrap;
+      overflow-x: auto;
+      min-width: 0;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* 截图预览 */
     .preview-section {
       margin-bottom: 48px;
     }
@@ -411,6 +443,7 @@
     .feature-icon {
       color: var(--md-sys-color-primary);
       font-size: 22px;
+      flex-shrink: 0;
     }
 
     .feature-card h3 {
@@ -453,6 +486,8 @@
       color: var(--md-sys-color-on-surface);
       margin-top: 6px;
       overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
     }
 
     footer {
@@ -473,12 +508,14 @@
 
     .footer-links {
       display: flex;
+      flex-wrap: wrap;
       gap: 16px;
     }
 
     .footer-link {
       color: var(--md-sys-color-primary);
       text-decoration: none;
+      white-space: nowrap;
     }
     .footer-link:hover {
       text-decoration: underline;
@@ -494,6 +531,8 @@
       padding: 10px 20px;
       border-radius: var(--md-shape-corner-small);
       font-size: 0.85rem;
+      white-space: nowrap;
+      max-width: calc(100vw - 32px);
       transition: transform 0.2s ease;
       z-index: 1000;
       pointer-events: none;
@@ -501,15 +540,60 @@
     .toast.show {
       transform: translateX(-50%) translateY(0);
     }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 0 16px;
+      }
+      .hero {
+        padding: 32px 0 24px;
+      }
+      .hero-actions {
+        flex-direction: column;
+      }
+      .hero-actions .btn {
+        width: 100%;
+      }
+      .nav-btn-text {
+        display: none;
+      }
+      .nav-actions .btn {
+        padding: 0 12px;
+        height: 36px;
+      }
+      .terminal-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 14px;
+      }
+      .terminal-content button {
+        width: 100%;
+        height: 36px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .guide-box {
+        padding: 16px;
+      }
+      .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      .footer-links {
+        width: 100%;
+        gap: 12px 16px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- 1. Top App Bar -->
   <header class="top-app-bar">
     <div class="container nav-content">
       <a href="#" class="brand">
-        <!-- 当前目录下的 icon.png -->
         <img src="icon.png" alt="FlatHMCL Icon" class="brand-icon">
         <span class="brand-title">FlatHMCL</span>
       </a>
@@ -520,13 +604,12 @@
         </button>
         <button class="btn btn-filled" id="navInstallBtn">
           <span class="material-symbols-rounded" style="font-size: 18px;">terminal</span>
-          <span>复制安装命令</span>
+          <span class="nav-btn-text">复制安装命令</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- 2. Hero & 安装区域 -->
   <main class="container">
     <section class="hero">
       <div class="app-id-tag">io.github.theoninesixy.FlatHMCL</div>
@@ -546,18 +629,16 @@
         </a>
       </div>
 
-      <!-- 不上架 Flathub 声明 -->
       <div class="info-callout">
         <h4>
           <span class="material-symbols-rounded" style="font-size: 18px; color: var(--md-sys-color-primary);">info</span>
           分发与安装说明
         </h4>
         <p>
-          本项目为独立打包与维护，<strong>不会上架 Flathub</strong>。无需手动下载安装包，直接在终端中运行下方的远程安装命令即可一键完成安装。
+          本项目为独立打包与维护，<strong class="nowrap">不会上架 Flathub</strong>。无需手动下载安装包，直接在终端中运行下方的远程安装命令即可一键完成安装。
         </p>
       </div>
 
-      <!-- 远程直接安装终端命令条 -->
       <div class="terminal-box">
         <div class="terminal-header">
           <span>终端直接安装远程文件</span>
@@ -573,7 +654,6 @@
       </div>
     </section>
 
-    <!-- 3. 主界面截图预览 (当前目录下的 screenshot.png) -->
     <section class="preview-section">
       <h2 class="section-heading" style="margin-top: 0;">主界面概览</h2>
       <div class="preview-card">
@@ -582,7 +662,6 @@
       </div>
     </section>
 
-    <!-- 4. 项目特性 -->
     <section>
       <h2 class="section-heading">打包特性</h2>
       <div class="features-grid">
@@ -612,7 +691,7 @@
             <h3>规范权限与持久化</h3>
           </div>
           <p>
-            独立沙盒保护，规范映射 <code>~/.minecraft</code> 与 <code>~/.hmcl</code> 目录，既能保护宿主机文件安全，又能与现有游戏配置无缝衔接。
+            独立沙盒保护，规范映射 <code class="nowrap">~/.minecraft</code> 与 <code class="nowrap">~/.hmcl</code> 目录，既能保护宿主机文件安全，又能与现有游戏配置无缝衔接。
           </p>
         </div>
 
@@ -628,7 +707,6 @@
       </div>
     </section>
 
-    <!-- 5. 本地构建步骤 -->
     <section>
       <h2 class="section-heading">本地编译与构建</h2>
       <div class="guide-box">
@@ -655,7 +733,6 @@
     </section>
   </main>
 
-  <!-- 6. Footer -->
   <footer>
     <div class="container footer-content">
       <div>
@@ -672,12 +749,9 @@
     </div>
   </footer>
 
-  <!-- Toast 复制提示 -->
   <div id="toast" class="toast">命令已复制到剪贴板</div>
 
-  <!-- 脚本逻辑 -->
   <script>
-    // 1. 深浅色模式管理（默认跟随浏览器/系统，支持三态循环：系统自动 -> 暗色 -> 浅色）
     const themeToggleBtn = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const htmlEl = document.documentElement;
@@ -708,7 +782,6 @@
       applyTheme(modes[nextIndex]);
     });
 
-    // 2. 一键复制命令逻辑
     const cmdText = document.getElementById('cmdRemote').innerText;
     const toast = document.getElementById('toast');
     let toastTimer;
