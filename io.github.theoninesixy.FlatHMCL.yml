@@ -5,6 +5,7 @@ sdk: org.freedesktop.Sdk
 command: hmcl
 
 sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk25
   - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
