@@ -7,7 +7,7 @@ Title=HMCL
 Comment=Hello Minecraft! Launcher Flatpak 版
 Description=HMCL 是一款开源、跨平台的 Minecraft 启动器。
 
-Url=https://onsy.qzz.io/FlatHMCL/repo/
+Url=https://onsy.qzz.io/FlatHMCL/FlatHMCL/
 
 RuntimeRepo=https://dl.flathub.org/repo/flathub.flatpakrepo
 
