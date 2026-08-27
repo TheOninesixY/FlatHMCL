@@ -30,7 +30,7 @@ if [ -n "$RELEASE_JSON" ] && echo "$RELEASE_JSON" | jq -e . >/dev/null 2>&1; the
     if [ -n "$LATEST_TAG" ] && [ -n "$DOWNLOAD_URL" ] && [ "$LATEST_TAG" != "$CURRENT_TAG" ]; then
         echo "[INFO] New version '$LATEST_TAG' detected (current: '${CURRENT_TAG:-none}'). Starting update..."
         
-        if curl -sL "$DOWNLOAD_URL" -o "$TMP_PATH" && [ -s "$TMP_PATH" ] && [ $(stat -c%s "$TMP_PATH" 2>/dev/null || stat -f%z "$TMP_PATH") -gt 2097152 ]; then
+        if curl -sL --connect-timeout 10 --max-time 300 "$DOWNLOAD_URL" -o "$TMP_PATH" && [ -s "$TMP_PATH" ] && [ $(stat -c%s "$TMP_PATH" 2>/dev/null || stat -f%z "$TMP_PATH") -gt 2097152 ]; then
             mv "$TMP_PATH" "$EXEC_PATH"
             echo "$LATEST_TAG" > "$VERSION_FILE"
             echo "[INFO] Update completed successfully to $LATEST_TAG."

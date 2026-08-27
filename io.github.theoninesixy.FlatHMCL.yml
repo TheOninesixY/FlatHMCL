@@ -13,7 +13,7 @@ finish-args:
   - --socket=x11
   - --share=ipc
   - --device=dri
-  - --device=all
+  - --socket=wayland
   - --share=network
   - --socket=pulseaudio
   - --talk-name=org.freedesktop.Notifications
@@ -24,6 +24,17 @@ finish-args:
   - --allow=devel
 
 modules:
+  - name: jq
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 jq /app/bin/jq
+    sources:
+      - type: file
+        url: https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux64
+        sha256: 5942c9b0934e510ee61eb3e30273f1b3fe2590df93933a93d7c58b81d19c8ff5
+        dest-filename: jq
+        only-arches:
+          - x86_64
   - name: openjdk
     buildsystem: simple
     build-commands:
