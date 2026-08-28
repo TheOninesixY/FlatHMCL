@@ -19,8 +19,8 @@
     </p>
   </description>
   <launchable type="desktop-id">io.github.theoninesixy.FlatHMCL.desktop</launchable>
-  <url type="homepage">https://hmcl.huangyuhui.net/</url>
-  <url type="bugtracker">https://github.com/HMCL-dev/HMCL/issues</url>
+  <url type="homepage">https://onsy.qzz.io/FlatHMCL/</url>
+  <url type="bugtracker">https://github.com/TheOninesixY/FlatHMCL/issues</url>
   <content_rating type="oars-1.1" />
   <releases>
     <release version="1.5.0" date="2026-08-26">
