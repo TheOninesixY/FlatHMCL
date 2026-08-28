@@ -8,25 +8,22 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
-  # 环境变量
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --env=JAVA_HOME=/app/jre
   - --env=GDK_BACKEND=x11
-  # 显示与图形
   - --socket=x11
   - --socket=wayland
   - --share=ipc
   - --device=dri
-  # 音频与网络
   - --share=network
   - --socket=pulseaudio
-  # 系统服务与通知
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.freedesktop.secrets
-  # 目录与存储
   - --filesystem=xdg-documents
   - --filesystem=xdg-download
   - --filesystem=~/.minecraft:create
+  - --device=input
+  - --filesystem=/run/udev:ro
 
 modules:
   - name: jq
@@ -62,6 +59,8 @@ modules:
       - install -Dm644 io.github.theoninesixy.FlatHMCL.desktop /app/share/applications/io.github.theoninesixy.FlatHMCL.desktop
       - install -Dm644 io.github.theoninesixy.FlatHMCL.metainfo.xml /app/share/metainfo/io.github.theoninesixy.FlatHMCL.metainfo.xml
       - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
+      - mkdir -p /app/share/hmcl
+      - cp -ra bin /app/share/hmcl/
     sources:
       - type: file
         path: run.sh
@@ -71,3 +70,6 @@ modules:
         path: io.github.theoninesixy.FlatHMCL.metainfo.xml
       - type: file
         path: io.github.theoninesixy.FlatHMCL.png
+      - type: dir
+        path: bin
+        dest: bin
