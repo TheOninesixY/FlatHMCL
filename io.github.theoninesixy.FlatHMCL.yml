@@ -27,7 +27,6 @@ finish-args:
   - --filesystem=xdg-documents
   - --filesystem=xdg-download
   - --filesystem=~/.minecraft:create
-  - --filesystem=~/.hmcl:create
 
 modules:
   - name: jq

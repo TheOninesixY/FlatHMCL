@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATA_DIR="${XDG_DATA_HOME:-$HOME/.var/app/io.github.theoninesixy.FlatHMCL/data}/hmcl-bin"
-mkdir -p "$DATA_DIR"
+APP_DATA_DIR="${XDG_DATA_HOME:-$HOME/.var/app/io.github.theoninesixy.FlatHMCL/data}"
+BIN_DIR="$APP_DATA_DIR/bin"
+WORK_DIR="$APP_DATA_DIR"
+HMCL_DIR="$APP_DATA_DIR/"
 
-VERSION_FILE="$DATA_DIR/version.txt"
-EXEC_PATH="$DATA_DIR/HMCL.jar"
-TMP_PATH="$DATA_DIR/HMCL.jar.tmp"
+mkdir -p "$BIN_DIR" "$HMCL_DIR"
+
+VERSION_FILE="$BIN_DIR/version.txt"
+EXEC_PATH="$BIN_DIR/HMCL.jar"
+TMP_PATH="$BIN_DIR/HMCL.jar.tmp"
 
 echo "[INFO] Checking for the latest HMCL version..."
 
@@ -55,4 +59,6 @@ if [ ! -f "$EXEC_PATH" ]; then
     exit 1
 fi
 
-exec java -jar "$EXEC_PATH" "$@"
+cd "$WORK_DIR"
+
+exec java -Dhmcl.dir="$HMCL_DIR" -Dhmcl.home="$HMCL_DIR" -jar "$EXEC_PATH" "$@"
