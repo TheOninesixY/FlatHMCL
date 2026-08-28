@@ -5,7 +5,6 @@ sdk: org.freedesktop.Sdk
 command: hmcl
 
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk25
   - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
@@ -54,9 +53,9 @@ modules:
   - name: openjdk-runtimes
     buildsystem: simple
     build-commands:
-      - mkdir -p /app/lib/jvm/openjdk-21 /app/lib/jvm/openjdk-25
+      - mkdir -p /app/lib/jvm/openjdk-21
       - cp -ra /usr/lib/sdk/openjdk21/jvm/openjdk-21/* /app/lib/jvm/openjdk-21/
-      - cp -ra /usr/lib/sdk/openjdk25/jvm/openjdk-25/* /app/lib/jvm/openjdk-25/
+      - rm -rf /app/lib/jvm/openjdk-21/{include,demo,man,legal,lib/src.zip,jmods}
       - ln -s /app/lib/jvm/openjdk-21 /app/jre
 
   - name: hmcl-build
