@@ -1,6 +1,6 @@
 app-id: io.github.theoninesixy.FlatHMCL
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: hmcl
 
@@ -51,10 +51,14 @@ modules:
         only-arches:
           - aarch64
 
-  - name: openjdk
+  - name: openjdk-runtimes
     buildsystem: simple
     build-commands:
-      - /usr/lib/sdk/openjdk21/install.sh
+      - mkdir -p /app/lib/jvm/openjdk-21 /app/lib/jvm/openjdk-25
+      - cp -ra /usr/lib/sdk/openjdk21/jvm/openjdk-21/* /app/lib/jvm/openjdk-21/
+      - cp -ra /usr/lib/sdk/openjdk25/jvm/openjdk-25/* /app/lib/jvm/openjdk-25/
+      - ln -s /app/lib/jvm/openjdk-21 /app/jre
+
   - name: hmcl-build
     buildsystem: simple
     build-commands:
