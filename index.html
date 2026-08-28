@@ -615,7 +615,7 @@
       <div class="app-id-tag">io.github.theoninesixy.FlatHMCL</div>
       <h1 class="hero-title">FlatHMCL</h1>
       <p class="hero-desc">
-        为 Linux 桌面及 SteamOS 打造的独立 Flatpak 打包版本 Hello Minecraft! Launcher。基于 OpenJDK 与 Freedesktop 25.08 平台构建，支持沙盒隔离与启动时自动同步上游最新构建。
+        为 Linux 桌面及 SteamOS 打造的独立 Flatpak 打包版本 Hello Minecraft! Launcher。构建期固化上游稳定构建与 OpenJDK 21 运行环境，秒级离线启动，具备纯净沙盒隔离保护。
       </p>
 
       <div class="hero-actions">
@@ -635,7 +635,7 @@
           分发与安装说明
         </h4>
         <p>
-          本项目为独立打包与维护，<strong class="nowrap">不会上架 Flathub</strong>。无需手动下载安装包，直接在终端中运行下方的远程安装命令即可一键完成安装。
+          本项目为社区独立维护的非官方 Flatpak 打包版本。无需手动下载安装包，在终端中执行下方命令即可一键完成远程安装。
         </p>
       </div>
 
@@ -667,11 +667,11 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-header">
-            <span class="material-symbols-rounded feature-icon">sync</span>
-            <h3>启动自动同步上游</h3>
+            <span class="material-symbols-rounded feature-icon">bolt</span>
+            <h3>秒级离线启动</h3>
           </div>
           <p>
-            内置运行机制，启动时自动通过 GitHub API 检测并拉取 HMCL 上游最新稳定 Release JAR 文件；离线或网络故障时自动回退启动本地已有版本。
+            核心组件与 JAR 包在构建期严格锁定与预置，无任何启动自检网络开销，离线环境亦可毫秒级秒开。
           </p>
         </div>
 

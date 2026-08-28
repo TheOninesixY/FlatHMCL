@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=HMCL
+Name=FlatHMCL
 GenericName=Hello Minecraft! Launcher
-Comment=HMCL Minecraft Launcher
+Comment=HMCL Minecraft Launcher (Unofficial Flatpak)
 Exec=hmcl
 Icon=io.github.theoninesixy.FlatHMCL
 Terminal=false

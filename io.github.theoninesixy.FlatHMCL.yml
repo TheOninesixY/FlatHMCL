@@ -8,11 +8,11 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
+  - --require-version=1.16.0
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
   - --env=JAVA_HOME=/app/jre
   - --env=GDK_BACKEND=x11
   - --socket=x11
-  - --socket=wayland
   - --share=ipc
   - --device=dri
   - --share=network
@@ -26,24 +26,6 @@ finish-args:
   - --filesystem=/run/udev:ro
 
 modules:
-  - name: jq
-    buildsystem: simple
-    build-commands:
-      - install -Dm755 jq /app/bin/jq
-    sources:
-      - type: file
-        url: https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux64
-        sha256: 5942c9b0934e510ee61eb3e30273f1b3fe2590df93933a93d7c58b81d19c8ff5
-        dest-filename: jq
-        only-arches:
-          - x86_64
-      - type: file
-        url: https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64
-        sha256: 39a486333932766dc822d56a31c039ab610a7114d69bcba23a3d5e2a233b8253
-        dest-filename: jq
-        only-arches:
-          - aarch64
-
   - name: openjdk-runtimes
     buildsystem: simple
     build-commands:
@@ -52,16 +34,24 @@ modules:
       - rm -rf /app/lib/jvm/openjdk-21/{include,demo,man,legal,lib/src.zip,jmods}
       - ln -s /app/lib/jvm/openjdk-21 /app/jre
 
-  - name: hmcl-build
+  - name: hmcl
     buildsystem: simple
     build-commands:
       - install -Dm755 run.sh /app/bin/hmcl
+      - install -Dm644 HMCL.jar /app/share/hmcl/HMCL.jar
       - install -Dm644 io.github.theoninesixy.FlatHMCL.desktop /app/share/applications/io.github.theoninesixy.FlatHMCL.desktop
       - install -Dm644 io.github.theoninesixy.FlatHMCL.metainfo.xml /app/share/metainfo/io.github.theoninesixy.FlatHMCL.metainfo.xml
       - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
-      - mkdir -p /app/share/hmcl
-      - cp -ra bin /app/share/hmcl/
     sources:
+      - type: file
+        url: https://github.com/HMCL-dev/HMCL/releases/download/v3.16.3/HMCL-3.16.3.jar
+        sha256: 5d02f4d04d9442116354ecfccf679910cca371d00a23cd5d6b16558c20a73dd3
+        dest-filename: HMCL.jar
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/HMCL-dev/HMCL/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .assets[] | select(.name | test("^HMCL-.*\\.jar$")) | .browser_download_url
       - type: file
         path: run.sh
       - type: file
@@ -70,6 +60,3 @@ modules:
         path: io.github.theoninesixy.FlatHMCL.metainfo.xml
       - type: file
         path: io.github.theoninesixy.FlatHMCL.png
-      - type: dir
-        path: bin
-        dest: bin
