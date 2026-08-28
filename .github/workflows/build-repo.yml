@@ -39,12 +39,16 @@ jobs:
 
       - name: Build Flatpak and Export to OSTree Repo
         run: |
+          echo "[INFO] Initializing system dbus machine-id..."
+          dbus-uuidgen --ensure 2>/dev/null || true
+
           echo "[INFO] Installing runtime dependencies..."
           flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
           echo "[INFO] Building package and committing to repo..."
           flatpak-builder \
             --user \
+            --disable-rofiles-fuse \
             --install-deps-from=flathub \
             --gpg-sign="${GPG_KEY_ID}" \
             --repo=repo \
