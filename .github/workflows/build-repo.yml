@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'io.github.theoninesixy.FlatHMCL.yml'
-      - 'io.github.theoninesixy.FlatHMCL.desktop'
-      - 'io.github.theoninesixy.FlatHMCL.metainfo.xml'
-      - 'run.sh'
-      - 'bin/**'
   workflow_dispatch:
 
 permissions:
