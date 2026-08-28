@@ -1,62 +1,64 @@
-app-id: io.github.theoninesixy.FlatHMCL
-runtime: org.freedesktop.Platform
-runtime-version: '25.08'
-sdk: org.freedesktop.Sdk
-command: hmcl
+name: Check and Update Upstream HMCL
 
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk21
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
-finish-args:
-  - --require-version=1.16.0
-  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
-  - --env=JAVA_HOME=/app/jre
-  - --env=GDK_BACKEND=x11
-  - --socket=x11
-  - --share=ipc
-  - --device=dri
-  - --share=network
-  - --socket=pulseaudio
-  - --talk-name=org.freedesktop.Notifications
-  - --talk-name=org.freedesktop.secrets
-  - --filesystem=xdg-documents
-  - --filesystem=xdg-download
-  - --filesystem=~/.minecraft:create
-  - --device=input
-  - --filesystem=/run/udev:ro
+permissions:
+  contents: write
 
-modules:
-  - name: openjdk-runtimes
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /app/lib/jvm/openjdk-21
-      - cp -ra /usr/lib/sdk/openjdk21/jvm/openjdk-21/* /app/lib/jvm/openjdk-21/
-      - rm -rf /app/lib/jvm/openjdk-21/{include,demo,man,legal,lib/src.zip,jmods}
-      - ln -s /app/lib/jvm/openjdk-21 /app/jre
+jobs:
+  update:
+    runs-on: ubuntu-latest
 
-  - name: hmcl
-    buildsystem: simple
-    build-commands:
-      - install -Dm755 run.sh /app/bin/hmcl
-      - install -Dm644 HMCL.jar /app/share/hmcl/HMCL.jar
-      - install -Dm644 io.github.theoninesixy.FlatHMCL.desktop /app/share/applications/io.github.theoninesixy.FlatHMCL.desktop
-      - install -Dm644 io.github.theoninesixy.FlatHMCL.metainfo.xml /app/share/metainfo/io.github.theoninesixy.FlatHMCL.metainfo.xml
-      - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
-    sources:
-      - type: file
-        url: https://github.com/HMCL-dev/HMCL/releases/download/v3.15.1/HMCL-3.15.1.jar
-        sha256: 52feb0dd71324a8aac2829995668839067e67ab7ad1dfbe9c05998309cf49afe
-        dest-filename: HMCL.jar
-        x-checker-data:
-          type: json
-          url: https://api.github.com/repos/HMCL-dev/HMCL/releases/latest
-          version-query: .tag_name | sub("^v"; "")
-          url-query: .assets[] | select(.name | test("^HMCL-.*\\.jar$")) | .browser_download_url
-      - type: file
-        path: run.sh
-      - type: file
-        path: io.github.theoninesixy.FlatHMCL.desktop
-      - type: file
-        path: io.github.theoninesixy.FlatHMCL.metainfo.xml
-      - type: file
-        path: io.github.theoninesixy.FlatHMCL.png
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync upstream HMCL release
+        run: |
+          echo "[INFO] Querying upstream release metadata..."
+          RELEASE_DATA=$(curl -sL -H "Accept: application/vnd.github+json" -H "User-Agent: FlatHMCL-Sync-Bot" https://api.github.com/repos/HMCL-dev/HMCL/releases/latest)
+          
+          LATEST_TAG=$(echo "$RELEASE_DATA" | jq -r '.tag_name // empty')
+          JAR_ASSET=$(echo "$RELEASE_DATA" | jq -c '.assets[] | select(.name | test("^HMCL-.*\\.jar$"))' | head -n 1)
+          
+          if [ -z "$LATEST_TAG" ] || [ -z "$JAR_ASSET" ]; then
+            echo "[ERROR] Failed to parse upstream release asset from GitHub API." >&2
+            exit 1
+          fi
+
+          VERSION="${LATEST_TAG#v}"
+          JAR_URL=$(echo "$JAR_ASSET" | jq -r '.browser_download_url')
+          JAR_DIGEST=$(echo "$JAR_ASSET" | jq -r '.digest // empty')
+          JAR_SHA256="${JAR_DIGEST#sha256:}"
+
+          if [ -z "$JAR_SHA256" ] || [ "$JAR_SHA256" = "null" ]; then
+            echo "[ERROR] SHA256 digest is unavailable in release metadata." >&2
+            exit 1
+          fi
+
+          echo "[INFO] Upstream version: $VERSION"
+          echo "[INFO] Asset URL: $JAR_URL"
+          echo "[INFO] Asset SHA256: $JAR_SHA256"
+
+          sed -i -E "s|url: https://github.com/HMCL-dev/HMCL/releases/download/[^ ]+|url: $JAR_URL|g" io.github.theoninesixy.FlatHMCL.yml
+          sed -i -E "s|sha256: [a-f0-9]{64}|sha256: $JAR_SHA256|g" io.github.theoninesixy.FlatHMCL.yml
+
+          RELEASE_DATE=$(date -u +'%Y-%m-%d')
+          sed -i -E "s|<release version=\"[^\"]+\" date=\"[^\"]+\">|<release version=\"$VERSION\" date=\"$RELEASE_DATE\">|g" io.github.theoninesixy.FlatHMCL.metainfo.xml
+          sed -i -E "s|<p>同步 HMCL 上游官方版本 [^<]+ 发布。<\/p>|<p>同步 HMCL 上游官方版本 $VERSION 发布。<\/p>|g" io.github.theoninesixy.FlatHMCL.metainfo.xml
+
+          if git diff --quiet io.github.theoninesixy.FlatHMCL.yml io.github.theoninesixy.FlatHMCL.metainfo.xml; then
+            echo "[INFO] No changes detected. All files are up to date."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add io.github.theoninesixy.FlatHMCL.yml io.github.theoninesixy.FlatHMCL.metainfo.xml
+            git commit -m "[AUTO] Sync upstream HMCL to $LATEST_TAG"
+            git push origin main
+            echo "[INFO] Successfully committed and pushed updates."
+          fi
