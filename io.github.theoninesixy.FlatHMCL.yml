@@ -1,141 +1,62 @@
-name: Check and Update Upstream HMCL
+app-id: io.github.theoninesixy.FlatHMCL
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: hmcl
 
-on:
-  schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
 
-permissions:
-  contents: write
+finish-args:
+  - --require-version=1.16.0
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+  - --env=GDK_BACKEND=x11
+  - --socket=x11
+  - --share=ipc
+  - --device=dri
+  - --share=network
+  - --socket=pulseaudio
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.secrets
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-download
+  - --filesystem=~/.minecraft:create
+  - --device=input
+  - --filesystem=/run/udev:ro
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
+modules:
+  - name: openjdk-runtimes
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib/jvm/openjdk-21
+      - cp -ra /usr/lib/sdk/openjdk21/jvm/openjdk-21/* /app/lib/jvm/openjdk-21/
+      - rm -rf /app/lib/jvm/openjdk-21/{include,demo,man,legal,lib/src.zip,jmods}
+      - ln -s /app/lib/jvm/openjdk-21 /app/jre
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Sync upstream HMCL release via Python
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python3 - << 'EOF'
-          import os
-          import sys
-          import json
-          import re
-          import hashlib
-          import datetime
-          import urllib.request
-          import subprocess
-
-          api_url = "https://api.github.com/repos/HMCL-dev/HMCL/releases/latest"
-          headers = {
-              "User-Agent": "FlatHMCL-Sync-Bot",
-              "Accept": "application/vnd.github+json"
-          }
-          token = os.environ.get("GITHUB_TOKEN")
-          if token:
-              headers["Authorization"] = f"Bearer {token}"
-
-          print("[INFO] Fetching latest release metadata from GitHub API...")
-          try:
-              req = urllib.request.Request(api_url, headers=headers)
-              with urllib.request.urlopen(req, timeout=15) as resp:
-                  release_data = json.loads(resp.read().decode())
-          except Exception as e:
-              print(f"[ERROR] Failed to query GitHub API: {e}", file=sys.stderr)
-              sys.exit(1)
-
-          tag_name = release_data.get("tag_name", "")
-          version = tag_name.lstrip("v")
-          assets = release_data.get("assets", [])
-
-          target_asset = None
-          for asset in assets:
-              name = asset.get("name", "")
-              if name.endswith(".jar") and "HMCL" in name:
-                  target_asset = asset
-                  break
-
-          if not target_asset:
-              print("[ERROR] No matching HMCL .jar asset found in latest release.", file=sys.stderr)
-              sys.exit(1)
-
-          jar_url = target_asset.get("browser_download_url")
-          digest = target_asset.get("digest") or ""
-          
-          if digest.startswith("sha256:"):
-              jar_sha256 = digest[7:]
-          else:
-              print("[INFO] Asset digest field not found in API response, calculating SHA256 stream...")
-              req_jar = urllib.request.Request(jar_url, headers={"User-Agent": "FlatHMCL-Sync-Bot"})
-              with urllib.request.urlopen(req_jar, timeout=30) as resp_jar:
-                  h = hashlib.sha256()
-                  while chunk := resp_jar.read(65536):
-                      h.update(chunk)
-                  jar_sha256 = h.hexdigest()
-
-          print(f"[INFO] Latest upstream tag: {tag_name}")
-          print(f"[INFO] Upstream version: {version}")
-          print(f"[INFO] Download URL: {jar_url}")
-          print(f"[INFO] Calculated/Retrieved SHA256: {jar_sha256}")
-
-          # Update io.github.theoninesixy.FlatHMCL.yml
-          manifest_path = "io.github.theoninesixy.FlatHMCL.yml"
-          with open(manifest_path, "r", encoding="utf-8") as f:
-              manifest_content = f.read()
-
-          updated_manifest = re.sub(
-              r'url:\s*https://github\.com/HMCL-dev/HMCL/releases/download/[^\s\n]+',
-              f'url: {jar_url}',
-              manifest_content
-          )
-          updated_manifest = re.sub(
-              r'sha256:\s*[a-f0-9]{64}',
-              f'sha256: {jar_sha256}',
-              updated_manifest
-          )
-
-          manifest_changed = (manifest_content != updated_manifest)
-          if manifest_changed:
-              with open(manifest_path, "w", encoding="utf-8") as f:
-                  f.write(updated_manifest)
-              print("[INFO] Manifest file updated successfully.")
-
-          # Update io.github.theoninesixy.FlatHMCL.metainfo.xml
-          metainfo_path = "io.github.theoninesixy.FlatHMCL.metainfo.xml"
-          with open(metainfo_path, "r", encoding="utf-8") as f:
-              metainfo_content = f.read()
-
-          release_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
-          updated_metainfo = re.sub(
-              r'<release version="[^"]+" date="[^"]+">',
-              f'<release version="{version}" date="{release_date}">',
-              metainfo_content
-          )
-          updated_metainfo = re.sub(
-              r'<p>同步 HMCL 上游官方版本 [^<]+ 发布。<\/p>',
-              f'<p>同步 HMCL 上游官方版本 {version} 发布。<\/p>',
-              updated_metainfo
-          )
-
-          metainfo_changed = (metainfo_content != updated_metainfo)
-          if metainfo_changed:
-              with open(metainfo_path, "w", encoding="utf-8") as f:
-                  f.write(updated_metainfo)
-              print("[INFO] Metainfo file updated successfully.")
-
-          if manifest_changed or metainfo_changed:
-              subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
-              subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=True)
-              subprocess.run(["git", "add", manifest_path, metainfo_path], check=True)
-              subprocess.run(["git", "commit", "-m", f"[AUTO] Sync upstream HMCL to {tag_name}"], check=True)
-              subprocess.run(["git", "push", "origin", "main"], check=True)
-              print(f"[INFO] Committed and pushed version {version} to main branch.")
-          else:
-              print("[INFO] All manifest and metainfo values already match upstream release. No commit needed.")
-          EOF
+  - name: hmcl
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 run.sh /app/bin/hmcl
+      - install -Dm644 HMCL.jar /app/share/hmcl/HMCL.jar
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.desktop /app/share/applications/io.github.theoninesixy.FlatHMCL.desktop
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.metainfo.xml /app/share/metainfo/io.github.theoninesixy.FlatHMCL.metainfo.xml
+      - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
+    sources:
+      - type: file
+        url: https://github.com/HMCL-dev/HMCL/releases/download/v3.15.1/HMCL-3.15.1.jar
+        sha256: 52feb0dd71324a8aac2829995668839067e67ab7ad1dfbe9c05998309cf49afe
+        dest-filename: HMCL.jar
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/HMCL-dev/HMCL/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .assets[] | select(.name | test("^HMCL-.*\\.jar$")) | .browser_download_url
+      - type: file
+        path: run.sh
+      - type: file
+        path: io.github.theoninesixy.FlatHMCL.desktop
+      - type: file
+        path: io.github.theoninesixy.FlatHMCL.metainfo.xml
+      - type: file
+        path: io.github.theoninesixy.FlatHMCL.png
