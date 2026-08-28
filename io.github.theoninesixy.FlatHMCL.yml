@@ -28,8 +28,6 @@ finish-args:
   - --filesystem=xdg-download
   - --filesystem=~/.minecraft:create
   - --filesystem=~/.hmcl:create
-  # 权限与调试支持
-  - --allow=devel
 
 modules:
   - name: jq
