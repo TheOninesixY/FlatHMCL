@@ -18,43 +18,124 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sync upstream HMCL release
+      - name: Sync upstream HMCL release via Python
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "[INFO] Checking upstream HMCL releases..."
-          RELEASE_DATA=$(curl -sL -H "User-Agent: FlatHMCL-Sync-Bot" https://api.github.com/repos/HMCL-dev/HMCL/releases/latest || true)
-          LATEST_TAG=$(echo "$RELEASE_DATA" | jq -r '.tag_name // empty')
-          JAR_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[]? | select(.name | test("^HMCL-.*\\.jar$")) | .browser_download_url // empty' | head -n 1)
+          python3 - << 'EOF'
+          import os
+          import sys
+          import json
+          import re
+          import hashlib
+          import datetime
+          import urllib.request
+          import subprocess
 
-          if [ -z "$LATEST_TAG" ] || [ -z "$JAR_URL" ]; then
-            echo "[WARN] Could not fetch latest release from GitHub API. Exiting."
-            exit 0
-          fi
+          api_url = "https://api.github.com/repos/HMCL-dev/HMCL/releases/latest"
+          headers = {
+              "User-Agent": "FlatHMCL-Sync-Bot",
+              "Accept": "application/vnd.github+json"
+          }
+          token = os.environ.get("GITHUB_TOKEN")
+          if token:
+              headers["Authorization"] = f"Bearer {token}"
 
-          VERSION="${LATEST_TAG#v}"
-          echo "[INFO] Upstream latest version: $VERSION"
+          print("[INFO] Fetching latest release metadata from GitHub API...")
+          try:
+              req = urllib.request.Request(api_url, headers=headers)
+              with urllib.request.urlopen(req, timeout=15) as resp:
+                  release_data = json.loads(resp.read().decode())
+          except Exception as e:
+              print(f"[ERROR] Failed to query GitHub API: {e}", file=sys.stderr)
+              sys.exit(1)
 
-          CURRENT_URL=$(grep -E 'https://github.com/HMCL-dev/HMCL/releases/download/' io.github.theoninesixy.FlatHMCL.yml | awk '{print $2}' | tr -d '"' | tr -d "'" || true)
+          tag_name = release_data.get("tag_name", "")
+          version = tag_name.lstrip("v")
+          assets = release_data.get("assets", [])
 
-          if [ "$CURRENT_URL" != "$JAR_URL" ]; then
-            echo "[INFO] New upstream release detected ($VERSION). Downloading JAR to calculate SHA256..."
-            curl -sL "$JAR_URL" -o /tmp/HMCL-latest.jar
-            JAR_SHA256=$(sha256sum /tmp/HMCL-latest.jar | awk '{print $1}')
-            rm -f /tmp/HMCL-latest.jar
+          target_asset = None
+          for asset in assets:
+              name = asset.get("name", "")
+              if name.endswith(".jar") and "HMCL" in name:
+                  target_asset = asset
+                  break
 
-            echo "[INFO] Updating manifest with URL and SHA256..."
-            sed -i -E "s|url: https://github.com/HMCL-dev/HMCL/releases/download/[^ ]+|url: $JAR_URL|g" io.github.theoninesixy.FlatHMCL.yml
-            sed -i -E "s|sha256: [a-f0-9]{64}|sha256: $JAR_SHA256|g" io.github.theoninesixy.FlatHMCL.yml
+          if not target_asset:
+              print("[ERROR] No matching HMCL .jar asset found in latest release.", file=sys.stderr)
+              sys.exit(1)
 
-            RELEASE_DATE=$(date -u +'%Y-%m-%d')
-            sed -i -E "s|<release version=\"[^\"]+\" date=\"[^\"]+\">|<release version=\"$VERSION\" date=\"$RELEASE_DATE\">|g" io.github.theoninesixy.FlatHMCL.metainfo.xml
-            sed -i -E "s|<p>同步 HMCL 上游官方版本 [^<]+ 发布。<\/p>|<p>同步 HMCL 上游官方版本 $VERSION 发布。<\/p>|g" io.github.theoninesixy.FlatHMCL.metainfo.xml
+          jar_url = target_asset.get("browser_download_url")
+          digest = target_asset.get("digest") or ""
+          
+          if digest.startswith("sha256:"):
+              jar_sha256 = digest[7:]
+          else:
+              print("[INFO] Asset digest field not found in API response, calculating SHA256 stream...")
+              req_jar = urllib.request.Request(jar_url, headers={"User-Agent": "FlatHMCL-Sync-Bot"})
+              with urllib.request.urlopen(req_jar, timeout=30) as resp_jar:
+                  h = hashlib.sha256()
+                  while chunk := resp_jar.read(65536):
+                      h.update(chunk)
+                  jar_sha256 = h.hexdigest()
 
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add io.github.theoninesixy.FlatHMCL.yml io.github.theoninesixy.FlatHMCL.metainfo.xml
-            git commit -m "[AUTO] Sync upstream HMCL to $LATEST_TAG"
-            git push origin main
-            echo "[INFO] Repository successfully updated and pushed for version $VERSION."
-          else
-            echo "[INFO] Manifest is already up to date with upstream version $VERSION."
-          fi
+          print(f"[INFO] Latest upstream tag: {tag_name}")
+          print(f"[INFO] Upstream version: {version}")
+          print(f"[INFO] Download URL: {jar_url}")
+          print(f"[INFO] Calculated/Retrieved SHA256: {jar_sha256}")
+
+          # Update io.github.theoninesixy.FlatHMCL.yml
+          manifest_path = "io.github.theoninesixy.FlatHMCL.yml"
+          with open(manifest_path, "r", encoding="utf-8") as f:
+              manifest_content = f.read()
+
+          updated_manifest = re.sub(
+              r'url:\s*https://github\.com/HMCL-dev/HMCL/releases/download/[^\s\n]+',
+              f'url: {jar_url}',
+              manifest_content
+          )
+          updated_manifest = re.sub(
+              r'sha256:\s*[a-f0-9]{64}',
+              f'sha256: {jar_sha256}',
+              updated_manifest
+          )
+
+          manifest_changed = (manifest_content != updated_manifest)
+          if manifest_changed:
+              with open(manifest_path, "w", encoding="utf-8") as f:
+                  f.write(updated_manifest)
+              print("[INFO] Manifest file updated successfully.")
+
+          # Update io.github.theoninesixy.FlatHMCL.metainfo.xml
+          metainfo_path = "io.github.theoninesixy.FlatHMCL.metainfo.xml"
+          with open(metainfo_path, "r", encoding="utf-8") as f:
+              metainfo_content = f.read()
+
+          release_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+          updated_metainfo = re.sub(
+              r'<release version="[^"]+" date="[^"]+">',
+              f'<release version="{version}" date="{release_date}">',
+              metainfo_content
+          )
+          updated_metainfo = re.sub(
+              r'<p>同步 HMCL 上游官方版本 [^<]+ 发布。<\/p>',
+              f'<p>同步 HMCL 上游官方版本 {version} 发布。<\/p>',
+              updated_metainfo
+          )
+
+          metainfo_changed = (metainfo_content != updated_metainfo)
+          if metainfo_changed:
+              with open(metainfo_path, "w", encoding="utf-8") as f:
+                  f.write(updated_metainfo)
+              print("[INFO] Metainfo file updated successfully.")
+
+          if manifest_changed or metainfo_changed:
+              subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+              subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=True)
+              subprocess.run(["git", "add", manifest_path, metainfo_path], check=True)
+              subprocess.run(["git", "commit", "-m", f"[AUTO] Sync upstream HMCL to {tag_name}"], check=True)
+              subprocess.run(["git", "push", "origin", "main"], check=True)
+              print(f"[INFO] Committed and pushed version {version} to main branch.")
+          else:
+              print("[INFO] All manifest and metainfo values already match upstream release. No commit needed.")
+          EOF
