@@ -44,8 +44,8 @@ modules:
       - install -Dm644 io.github.theoninesixy.FlatHMCL.png /app/share/icons/hicolor/256x256/apps/io.github.theoninesixy.FlatHMCL.png
     sources:
       - type: file
-        url: https://github.com/HMCL-dev/HMCL/releases/download/v3.16.3/HMCL-3.16.3.jar
-        sha256: 5d02f4d04d9442116354ecfccf679910cca371d00a23cd5d6b16558c20a73dd3
+        url: https://github.com/HMCL-dev/HMCL/releases/download/v3.16.4/HMCL-3.16.4.jar
+        sha256: 98f0123f38e86a606aa583f74d21ae74128679e921ea7ec0c43ab26303767e9e
         dest-filename: HMCL.jar
         x-checker-data:
           type: json
