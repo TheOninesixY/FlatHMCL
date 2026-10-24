@@ -11,13 +11,8 @@
 > [!WARNING]
 > 离线安装包在安装后将无法获取更新
 
-## 一些已知问题
-
-- 在启动器提示收到更新时，请不要点击更新
-- 启动器下载的Java会在下一次启动时失效（目前正在更新中...）
-
 ---
 
 如果你觉得这个项目对你有帮助，请给个🌟Start！
 
-![TheOninesixY](TheOninesixY.svg)
+![TheOninesixY](https://github.com/TheOninesixY/TheOninesixY/raw/refs/heads/main/logo.small.svg)
