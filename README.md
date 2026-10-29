@@ -15,4 +15,4 @@
 
 如果你觉得这个项目对你有帮助，请给个🌟Start！
 
-![TheOninesixY](https://github.com/TheOninesixY/TheOninesixY/raw/refs/heads/main/logo.small.svg)
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://tevg.onsy.qzz.io/font=Space_Grotesk-color=%23ffffff/?TheOninesixY"><source media="(prefers-color-scheme: light)" srcset="https://tevg.onsy.qzz.io/font=Space_Grotesk/?TheOninesixY"><img alt="TheOninesixY"></picture>
